@@ -1,0 +1,4 @@
+interface:
+  display_name: "宝可梦全景卡与壁纸"
+  short_description: "卡图扩展为全景卡或无字居中壁纸，支持边框选项与优先搜索英文卡"
+  default_prompt: "使用 $pokemon-card-to-full-art，将上传的宝可梦卡或网上找到的英文卡扩图：默认卡片模式锁定原画并使用灰黑圆角框，也可选主题色框、无框，或无字居中的壁纸模式。"
