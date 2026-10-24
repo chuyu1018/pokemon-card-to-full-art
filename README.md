@@ -1,6 +1,6 @@
 # 宝可梦平卡变 AR
 
-给 Codex 使用的宝可梦 PTCG 扩图技能。输入卡牌原图、截图或单卡照片，也可以让 Codex 先搜索指定宝可梦的英文卡。
+给 ChatGPT 与 Codex 使用的宝可梦 PTCG 扩图技能。输入卡牌原图、截图或单卡照片，也可以先搜索指定宝可梦的英文卡。
 
 ## 两种输出模式
 
@@ -15,11 +15,52 @@
 
 ## 安装
 
-将本仓库下载到 Codex 的个人技能目录，文件结构应为：
+### 在 ChatGPT 中安装
+
+#### 桌面端本地安装
+
+在支持本地电脑访问与 skill 安装的 ChatGPT 桌面端 Work 对话中，发送：
 
 ```text
-~/.codex/skills/pokemon-card-to-full-art/
+请安装这个 skill：https://github.com/chuyu1018/pokemon-card-to-full-art
+技能位于仓库根目录，请保留完整的 assets、references 和 agents 目录。
+```
+
+安装完成后，在下一轮对话输入 `@`，搜索并选择「宝可梦平卡变 AR」或 `pokemon-card-to-full-art`，然后上传原卡图片并描述需求。例如：
+
+```text
+把这张卡变成全景卡，使用默认灰黑色圆角外框。
+```
+
+本地安装仅作用于相应电脑环境，不代表已经安装到 ChatGPT 工作区，也不保证自动同步到网页或手机。桌面端独立技能与调用方式见 [OpenAI 官方 Build skills 文档](https://learn.chatgpt.com/docs/build-skills)。
+
+#### 通过工作区 Skills 页面安装
+
+适用于已开放 Skills 功能的 ChatGPT 工作区；当前官方列出的适用用户包括符合条件的 Business、Enterprise、Healthcare 和 Edu 用户，具体取决于工作区设置与产品可用性。
+
+1. 从本仓库的 **Code → Download ZIP** 下载文件，解压后保留完整技能目录；上传时按当前界面要求准备技能包，不要只保留 `SKILL.md` 而遗漏参考文件。
+2. 在 ChatGPT 侧栏打开 **Plugins（插件）→ Skills（技能）**。
+3. 选择 **Create → Upload from your computer**，上传技能包，按提示完成扫描与安装。
+4. 安装后输入 `@` 选择本技能，再上传卡牌图片或描述想找的卡片。
+
+如果没有 Skills 或上传入口，请检查账户与工作区是否支持此功能。完整操作及可用范围见 [OpenAI 官方 Skills in ChatGPT 说明](https://help.openai.com/en/articles/20001066-skills-in-chatgpt)。
+
+### 在 Codex 中安装
+
+可以直接在 Codex 中发送：
+
+```text
+使用 $skill-installer 安装 https://github.com/chuyu1018/pokemon-card-to-full-art
+技能位于仓库根目录，安装名称为 pokemon-card-to-full-art。
+```
+
+也可以手动将本仓库放入 Codex 的个人技能目录。官方当前文档列出的用户级目录为 `~/.agents/skills/`；部分安装器使用 `$CODEX_HOME/skills/`，未设置 `CODEX_HOME` 时通常为 `~/.codex/skills/`。以安装器实际返回的路径为准，同一技能保留一份即可。文件结构应为：
+
+```text
+pokemon-card-to-full-art/
 ├── SKILL.md
+├── README.md
+├── LICENSE
 ├── agents/openai.yaml
 ├── assets/
 │   ├── ui-reference.png
@@ -29,9 +70,13 @@
     └── wallpaper-prompt.md
 ```
 
-在 Codex 中调用 `$pokemon-card-to-full-art`，并提供图片或描述想找的卡片。生成依赖当前会话可用的图片编辑工具；仅下载技能本身不会提供图片生成服务。
+安装后在 Codex 中调用 `$pokemon-card-to-full-art`，并提供图片或描述想找的卡片。如果新安装或更新的技能没有出现，可以重启 Codex。
+
+无论通过哪种方式安装，生成都依赖当前会话可用的图片编辑工具；仅下载技能本身不会提供图片生成服务。自动找图还需要可用的联网搜索能力。
 
 ## 使用示例
+
+以下示例使用 Codex 的 `$pokemon-card-to-full-art` 写法；在 ChatGPT 中先通过 `@` 选中本技能，再发送相同的需求描述即可。
 
 ### 默认灰黑框卡片
 
@@ -74,6 +119,15 @@
 - [SKILL.md](SKILL.md)：模式选择、找图、生成与验收规则。
 - [卡片提示词](references/prompt.md)：卡片模式与三种外围框选项。
 - [壁纸提示词](references/wallpaper-prompt.md)：无字居中壁纸模式。
+- [LICENSE](LICENSE)：MIT 许可证全文，包括无担保与责任限制条款。
 - `assets/`：UI与外围框参考。仅参考对应的版式特征，不复制参考卡的角色、EX标识或游戏数据。
 
-参考图中的宝可梦角色与卡牌素材版权归各自权利人所有。本项目是非官方的生成工作流，与宝可梦官方无关联。
+## 许可证与免责声明
+
+本项目原创的技能指令、提示词、文档与配置采用 [MIT 许可证](LICENSE)，版权归 `chuyu1018` 所有。你可以使用、复制、修改、合并、发布、分发、再许可及销售这些原创内容的副本；分发副本或实质性部分时，须保留版权声明和许可声明。
+
+本项目按「现状」提供，不作任何明示或默示担保，包括适销性、特定用途适用性及不侵权担保。作者或版权持有人不对因本项目或其使用产生的索赔、损害或其他责任承担责任。完整条款以 [LICENSE](LICENSE) 中的英文 MIT 许可证为准。
+
+MIT 授权仅涵盖本项目有权授权的原创内容，不涵盖宝可梦角色、名称、商标、卡牌原画，以及 `assets/` 参考图片和用户输入中属于第三方的内容；这些内容的权利仍归各自权利人所有。本项目的 MIT 许可不授予这些素材或相关生成结果的额外使用、商业化或再分发权利。
+
+本项目是非官方的生成工作流，与宝可梦官方无关联，亦未获得其认可或背书。生成结果可能出现文字、数据或画面错误，应根据原卡自行核对。
