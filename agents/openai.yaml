@@ -1,4 +1,4 @@
 interface:
   display_name: "宝可梦平卡变 AR"
-  short_description: "卡图扩展为全景卡或无字居中壁纸，无卡图时搜索官网候选，支持边框选项"
-  default_prompt: "使用 $pokemon-card-to-full-art，将上传的宝可梦卡扩图；没有卡图时先从宝可梦亚洲官网搜索并提供选项，选定后默认生成灰黑框全景卡，也可选主题色框、无框或无字居中壁纸。"
+  short_description: "卡图扩展为全景卡或无字居中壁纸，支持简体中文卡搜索、官网候选与边框选项"
+  default_prompt: "使用 $pokemon-card-to-full-art，将上传的宝可梦卡扩图；没有卡图时先搜索并提供选项，简体中文卡使用 tcg.mik.moe，未指定语言时优先从宝可梦亚洲官网搜索，选定后默认生成灰黑框全景卡，也可选主题色框、无框或无字居中壁纸。"

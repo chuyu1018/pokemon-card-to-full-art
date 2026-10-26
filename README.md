@@ -1,6 +1,6 @@
 # 宝可梦平卡变 AR
 
-给 ChatGPT 与 Codex 使用的宝可梦 PTCG 扩图技能。输入卡牌原图、截图、单卡照片或多卡合照，也可以从宝可梦亚洲官网搜索卡片并挑选候选，或指定查找英文卡。
+给 ChatGPT 与 Codex 使用的宝可梦 PTCG 扩图技能。输入卡牌原图、截图、单卡照片或多卡合照，也可以搜索简体中文卡、从宝可梦亚洲官网挑选候选，或指定查找英文卡。
 
 ## 两种输出模式
 
@@ -11,9 +11,9 @@
 
 卡片模式中，“无框”仅去掉外围框，仍保留卡牌文字与顶部金属名称栏轮廓。名称与HP后面透出插画，底部普通描述不加底色和框。
 
-未提供卡片时，优先从 [宝可梦亚洲官方网站](https://asia.pokemon-card.com/) 搜索，提供通常3–5张不同插画的候选，附原图预览（可展示时）、卡名、系列／编号、语言／地区、来源链接和画面特点，选定后再生成。也可以明确让技能自行选图并直接生成。没有指定宝可梦时，会先选不同角色、适合扩图的普通卡供挑选。
+未提供卡片时，按指定语言选择搜索来源；未指定语言时优先从 [宝可梦亚洲官方网站](https://asia.pokemon-card.com/) 搜索。提供通常3–5张不同插画的候选，附原图预览（可展示时）、卡名、系列／编号、语言／地区、来源链接和画面特点，选定后再生成。也可以明确让技能自行选图并直接生成。没有指定宝可梦时，会先选不同角色、适合扩图的普通卡供挑选。
 
-中文卡可从 [台湾站](https://asia.pokemon-card.com/tw/card-search/) 或 [香港站](https://asia.pokemon-card.com/hk/card-search/) 查找，并标明实际卡面语言；指定英文卡时可使用 [PkmnCards](https://pkmncards.com/)。生成时保存原图来源、系列、编号和画师；多张不同卡优先选择不同插画。
+指定简体中文／简中卡时，先通过 [AREAZERO.GG 卡片库](https://tcg.mik.moe/cards) 按系列查找，或使用站内 [卡牌查找](https://tcg.mik.moe/cards/search/basic) 搜索宝可梦名称，再核对实际卡面的语言、系列和卡号。繁体中文卡可从 [台湾站](https://asia.pokemon-card.com/tw/card-search/) 或 [香港站](https://asia.pokemon-card.com/hk/card-search/) 查找；指定英文卡时可使用 [PkmnCards](https://pkmncards.com/)。生成时保存原图来源、系列、编号和画师；多张不同卡优先选择不同插画。
 
 ## 安装
 
@@ -110,6 +110,12 @@ pokemon-card-to-full-art/
 
 ```text
 使用 $pokemon-card-to-full-art，从宝可梦亚洲官网自行选一张适合扩图的伊布，直接生成灰黑框全景卡。
+```
+
+### 搜索简体中文卡
+
+```text
+使用 $pokemon-card-to-full-art，在 https://tcg.mik.moe/cards 找几张简体中文的妙蛙种子，给我带预览和来源的选项。
 ```
 
 ### 指定英文卡并批量生成
