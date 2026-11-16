@@ -9,6 +9,7 @@ const keyInput = $('api-key');
 const isArk = () => form.querySelector('[name=engine]:checked').value === 'ark';
 const drop = uploadArea.querySelector('.drop');
 const sampleUrl = new URL('./examples/ponyta-original.jpg', import.meta.url);
+const sampleBrief = '沿着小火马脚下的雪山向下延伸空旷的雪坡，只画岩石、积雪和草地，保留原画中唯一的一只小火马。';
 const inputTypes = ['image/jpeg', 'image/png', 'image/webp'];
 let selected = null;
 let sourceUrl = '';
@@ -36,6 +37,7 @@ function clearSelection() {
   loadingSource = false;
   selected = null;
   region.clear();
+  if ($('brief').value === sampleBrief) $('brief').value = '';
   sourceInput.value = '';
   if (sourceUrl) URL.revokeObjectURL(sourceUrl);
   sourceUrl = '';
@@ -80,6 +82,8 @@ async function chooseFile(readFile, sample = false) {
     if (decoded.naturalWidth * decoded.naturalHeight > 64_000_000) throw new Error('参考图像素过大，请缩小到 6400 万像素以内。');
     if (version !== selectionVersion) return false;
     region.load(decoded, sample);
+    if (sample && !$('brief').value.trim()) $('brief').value = sampleBrief;
+    if (!sample && $('brief').value === sampleBrief) $('brief').value = '';
     if (sourceUrl) URL.revokeObjectURL(sourceUrl);
     sourceUrl = url;
     url = '';

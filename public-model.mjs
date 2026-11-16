@@ -23,10 +23,10 @@ function scenePrompt(template, brief) {
   const artRule = template.split(/\r?\n/).find(line => line.startsWith('原插画保护区与视觉锚点'));
   if (!artRule) throw new Error('卡片模板缺少原插画保护与续画要求。');
   return [
+    brief ? 'Apply any relevant scenery notes while preserving the original subject and drawing a text-free continuous background: ' + brief : '',
     'A single uninterrupted edge-to-edge illustration, continuing the scene in the preserved artwork into the entire surrounding masked area. The completed scene fills every edge. Extend the ground or foreground all the way to the bottom and the sky or upper background all the way to the top. Continue the same scenery, contours, brush strokes, colors, lighting and perspective seamlessly on both sides.',
     'Keep the original subject exactly once, at its original position and scale inside the protected area. Draw only the surrounding environment. No new characters, text, logos, frames, margins, solid-color panels, smears or repeated textures. All white mask pixels require original painted scenery.',
     artRule,
-    brief ? 'Apply any relevant scenery notes while preserving the original subject and drawing a text-free continuous background: ' + brief : ''
   ].filter(Boolean).join('\n\n');
 }
 

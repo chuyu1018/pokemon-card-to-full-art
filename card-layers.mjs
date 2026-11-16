@@ -1,10 +1,10 @@
 // All preprocessing and final compositing use the visitor's browser.
 // Only guide, detail and mask are needed by the image generator.
-function canvas2d(width, height, readOften = false) {
+function canvas2d(width, height, readOften = false, alpha = true) {
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
-  const ctx = canvas.getContext('2d', { willReadFrequently: readOften });
+  const ctx = canvas.getContext('2d', { willReadFrequently: readOften, alpha });
   if (!ctx) throw new Error('当前浏览器无法创建绘图画布。');
   return ctx;
 }
@@ -17,9 +17,6 @@ function png(ctx) {
 }
 
 async function decode(blob) {
-  if (typeof createImageBitmap === 'function') {
-    try { return await createImageBitmap(blob); } catch { /* Fall through to the native decoder. */ }
-  }
   const url = URL.createObjectURL(blob);
   try {
     const img = new Image();
@@ -92,7 +89,7 @@ function extractPrint(original, box) {
   const startX = Math.max(1,Math.round(width * .043)), endX = width - startX;
   const titleTop = Math.round(height * .022), titleBottom = box.y - Math.max(1,Math.round(height * .003));
   // The narrow Pokédex / height / weight strip just below the art is removed.
-  const attackTop = box.y + box.h + Math.round(height * .031), endY = Math.floor(height * .974);
+  const attackTop = box.y + box.h + Math.round(height * .042), endY = Math.floor(height * .974);
   for (let y = titleTop; y < endY; y++) {
     const header = y < titleBottom;
     if (!header && y < attackTop) continue;
@@ -138,7 +135,7 @@ export async function prepareCardLayers(source, { rect, border = 'gray', brief =
   guide.fillStyle = 'rgb(' + [matte,matte,matte].join(',') + ')';
   guide.fillRect(0,0,width,height);
   guide.drawImage(detail.canvas,box.x,box.y);
-  const mask = canvas2d(width,height);
+  const mask = canvas2d(width,height,false,false);
   mask.fillStyle = 'white'; mask.fillRect(0,0,width,height);
   const overlap = Math.min(2,Math.floor((Math.min(box.w,box.h)-1)/2));
   mask.fillStyle = 'black';
@@ -160,7 +157,7 @@ function roundedPath(ctx,x,y,w,h,r) {
 
 export async function finishCardLayers(layers, scene) {
   const { width,height,box,art,print,border,theme } = layers;
-  const image = await decode(scene), ctx = canvas2d(width,height);
+  const image = await decode(scene), ctx = canvas2d(width,height,false,false);
   // Fill the target at its original aspect ratio. Models can round either side to
   // their pixel grid; a tiny scaling difference should not create empty bars.
   try { ctx.drawImage(image,0,0,width,height); } finally { image.close?.(); }

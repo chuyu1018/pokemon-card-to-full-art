@@ -3,13 +3,14 @@ const typical = { x: 0.09, y: 0.12, w: 0.82, h: 0.38 };
 const sampleArea = { x: 64 / 734, y: 108 / 1024, w: 605 / 734, h: 398 / 1024 };
 const clamp = (value, low, high) => Math.min(high, Math.max(low, value));
 
-function findEdge(pixels, width, height, axis, range, span, expected) {
+function findEdge(pixels, width, height, axis, range, span, expected, inward) {
   const horizontal = axis === 'y';
   const length = horizontal ? height : width;
   const crossLength = horizontal ? width : height;
   const start = Math.round(span[0] * crossLength);
   const end = Math.round(span[1] * crossLength);
   let best = expected, bestScore = 11;
+  const candidates = [];
   for (let i = Math.max(1, Math.round(length * range[0])); i < length * range[1]; i++) {
     const buckets = Array(6).fill(0);
     const counts = Array(6).fill(0);
@@ -27,7 +28,15 @@ function findEdge(pixels, width, height, axis, range, span, expected) {
     // Real card edges tend to continue across most of the artwork, unlike text and subject contours.
     const straightness = (levels[1] + levels[2] + levels[3]) / 3;
     const score = straightness * (1 - .3 * Math.abs(i / length - expected) / (range[1] - range[0]));
+    if (score > 11) candidates.push({ position: i / length, score });
     if (score > bestScore) { bestScore = score; best = i / length; }
+  }
+  // Narrow printed rims often create two parallel transitions; preserve the art-facing edge.
+  const first = best;
+  for (const candidate of candidates) {
+    const distance = (candidate.position - first) * inward;
+    if (distance > 0 && distance < .021 && candidate.score >= bestScore * .43 &&
+        (candidate.position - best) * inward > 0) best = candidate.position;
   }
   return best;
 }
@@ -43,11 +52,11 @@ export function estimateArtRegion(image) {
   ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
   const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
   const edge = (...args) => findEdge(pixels, canvas.width, canvas.height, ...args);
-  const top = edge('y', [.06, .23], [.20, .80], typical.y);
-  const bottom = edge('y', [.39, .65], [.20, .80], typical.y + typical.h);
+  const top = edge('y', [.06, .23], [.20, .80], typical.y, 1);
+  const bottom = edge('y', [.39, .65], [.20, .80], typical.y + typical.h, -1);
   const probe = [top + .035, bottom - .035];
-  const left = edge('x', [.045, .205], probe, typical.x);
-  const right = edge('x', [.795, .955], probe, typical.x + typical.w);
+  const left = edge('x', [.045, .205], probe, typical.x, 1);
+  const right = edge('x', [.795, .955], probe, typical.x + typical.w, -1);
   return { x: left, y: top, w: right - left, h: bottom - top };
 }
 
@@ -83,17 +92,21 @@ export function makeRegionEditor(container, isBusy) {
     if (isBusy() || !e.isPrimary || e.button !== 0 || gesture) return;
     const point = locate(e);
     const corner = e.target.closest('[data-corner]')?.dataset.corner;
-    gesture = { id: e.pointerId, anchor: corner ? cornerPoint(opposite[corner]) : point, previous: { ...area } };
+    gesture = { id: e.pointerId, anchor: corner ? cornerPoint(opposite[corner]) : point,
+      previous: { ...area }, startX: e.clientX, startY: e.clientY, moved: false };
     stage.setPointerCapture(e.pointerId);
     e.preventDefault();
   });
-  stage.addEventListener('pointermove', e => {
-    if (gesture?.id === e.pointerId && !isBusy()) updateArea(gesture.anchor, locate(e));
-  });
+  function applyDrag(e) {
+    if (gesture?.id !== e.pointerId || isBusy()) return;
+    gesture.moved ||= Math.hypot(e.clientX - gesture.startX, e.clientY - gesture.startY) > 3;
+    if (gesture.moved) updateArea(gesture.anchor, locate(e));
+  }
+  stage.addEventListener('pointermove', applyDrag);
   function endGesture(e, canceled) {
     if (gesture?.id !== e.pointerId) return;
     if (canceled) { area = gesture.previous; render(); }
-    else if (!isBusy()) updateArea(gesture.anchor, locate(e));
+    else applyDrag(e);
     gesture = null;
   }
   stage.addEventListener('pointerup', e => endGesture(e, false));
