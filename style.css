@@ -1,0 +1,104 @@
+:root {
+  color-scheme: light;
+  --paper: #f8f7f2; --ink: #232925; --blue: #2948ad; --muted: #565e58; --line: #b8bbb1;
+  color: var(--ink); background: var(--paper);
+  font-family: Inter, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+}
+* { box-sizing: border-box }
+[hidden] { display: none !important }
+body { margin: 0 }
+button, input, textarea { font: inherit; color: inherit }
+button, a, .drop, .choices label { -webkit-tap-highlight-color: transparent; touch-action: manipulation }
+a { color: inherit; text-decoration: none }
+button, .choices label { cursor: pointer }
+button:disabled, input:disabled, textarea:disabled, fieldset:disabled label, form[aria-busy=true] .drop { cursor: wait; opacity: .55 }
+a:hover, .linklike:hover { text-decoration: underline; text-underline-offset: .25em }
+:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px }
+.mast, main { width: min(1024px, calc(100% - 80px)); margin-inline: auto }
+.mast { height: 70px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--ink) }
+.brand { display: flex; align-items: center; gap: .55em; font-size: 20px; font-weight: 730; letter-spacing: .055em }
+.brand i { width: 17px; height: 22px; display: inline-block; border: 2px solid var(--blue); border-radius: 2px; transform: rotate(-7deg); box-shadow: -3px 2px 0 var(--paper), -4px 3px 0 var(--blue); position: relative }
+.brand i::after { content: ""; width: 7px; height: 7px; background: var(--blue); position: absolute; top: 3px; left: 3px }
+.jump { color: var(--muted); font-size: 14px }
+.jump span { color: var(--blue); margin-left: .4em }
+main { padding-bottom: 52px }
+.hero { display: grid; grid-template-columns: 1fr .89fr; align-items: center; gap: 4.5%; margin-block: 38px 36px }
+h1 { font-family: "Songti SC", "Noto Serif CJK SC", SimSun, serif; font-size: clamp(42px,5.6vw,70px); font-weight: 650; line-height: 1.13; letter-spacing: -.065em; margin: 0 }
+h1 em { color: var(--blue); font-style: normal }
+.hero p { margin: 18px 0 0; color: var(--muted); font-size: 15px; line-height: 1.85; max-width: 29em }
+.example { margin: 0; border: 1px solid #d3d3c7; padding: 16px 18px 8px; background-color: #e8e8dd; background-image: radial-gradient(#bfc2ae 0.7px, transparent 0.7px); background-size: 8px 8px }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 265px; margin: auto }
+.pair > div { display: flex; flex-direction: column; align-items: center }
+.pair img { display: block; width: 100%; height: auto; max-width: 116px; border-radius: 5px; box-shadow: 0 2px 4px #3c3d2924 }
+.pair span { display: block; font-size: 12px; font-weight: 600; margin-top: 5px }
+figcaption { margin-top: 6px; text-align: center; color: var(--muted); font-size: 11px }
+.columns { display: grid; grid-template-columns: 1fr 1fr; gap: 28px }
+.column { min-width: 0 }
+.field-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 11px }
+.field-head label, legend, .brief label, .key-field label { font-weight: 650; font-size: 15px }
+.linklike { padding: 0; background: none; border: none; color: var(--blue); font-size: 13px }
+#upload-area { position: relative; height: 194px }
+#source { width: 1px; height: 1px; opacity: 0; position: absolute }
+#source:focus-visible + .drop, .choices label:focus-within { outline: 2px solid var(--blue); outline-offset: 2px }
+.drop, .attachment { height: 100%; background: #eff0e9 }
+.drop { cursor: pointer; display: flex; border: 1px dashed #798574; flex-direction: column; align-items: center; justify-content: center; gap: 5px; text-align: center; padding: 10px }
+.drop:hover, #upload-area.drag .drop { background: #e5e9dd; border-color: var(--blue) }
+.upload-icon { width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid var(--blue); color: var(--blue); font-size: 22px; margin-bottom: 4px }
+.drop strong { font-size: 15px }
+small { font-size: 12px; line-height: 1.6; color: var(--muted) }
+.attachment { border: 1px solid var(--line); display: flex; flex-direction: column }
+.attachment img { width: 100%; height: calc(100% - 36px); object-fit: contain }
+.attachment-bar { height: 36px; border-top: 1px solid var(--line); background: white; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 12px; font-size: 13px }
+#filename { overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.settings { display: flex; flex-direction: column; gap: 22px }
+fieldset { padding: 0; margin: 0; border: 0; min-width: 0 }
+legend { padding: 0; margin-bottom: 10px }
+.choices { display: flex; flex-wrap: wrap; gap: 7px }
+.choices label { position: relative; display: flex; align-items: center; gap: 6px; border: 1px solid var(--line); padding: 8px 10px; font-size: 14px }
+.choices label:has(:checked) { color: var(--blue); border-color: var(--blue); background: #ecf0ff }
+.choices input { position: absolute; opacity: 0 }
+.edge { width: 11px; height: 15px; background: #d2d5bd; border-radius: 2px; border: 2px solid #3f403b }
+.theme { border-color: #82916b }
+.none { border: none }
+.brief { display: flex; flex-direction: column; gap: 8px; flex: 1 }
+.brief label span { color: var(--muted); font-size: 12px; margin-left: .3em; font-weight: normal }
+textarea, #api-key { width: 100%; border: 1px solid var(--line); background: #fff; padding: 10px 12px; font-size: 15px; line-height: 1.6; border-radius: 0 }
+textarea { resize: vertical; flex: 1; min-height: 88px }
+input::placeholder, textarea::placeholder { color: #72786f }
+.key-row { margin-top: 24px; padding-top: 19px; border-top: 1px solid var(--line); display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 24px }
+.key-field { max-width: 510px; display: grid; gap: 7px }
+.primary { border: 1px solid var(--blue); color: white; background: var(--blue); font-weight: 620; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; gap: 20px; padding: 12px 20px; min-height: 45px; white-space: nowrap; text-decoration: none }
+.primary:hover { background: #19388c; text-decoration: none }
+.feedback { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; margin-top: 12px }
+#status { font-size: 14px; line-height: 1.7; margin: 0; overflow-wrap: anywhere }
+#status.error { color: #9a2f1c }
+.output { margin-top: 22px; border-top: 1px solid var(--ink); padding-top: 18px }
+.result-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 14px }
+h2 { font-family: "Songti SC", SimSun, serif; font-size: clamp(24px,4vw,38px); line-height: 1.2; margin: 0 }
+.result-mat { background: #eaece3; border: 1px solid var(--line); padding: 20px; display: grid; place-items: center }
+.result-mat img { display: block; max-width: 100%; max-height: 70vh; object-fit: contain }
+@media (max-width: 700px) {
+  .mast, main { width: calc(100% - 36px) }
+  .mast { height: 56px }
+  .brand { font-size: 18px }
+  .hero { grid-template-columns: 1fr; gap: 15px; margin: 25px 0 }
+  .hero p { font-size: 14px; line-height: 1.7; margin-top: 10px }
+  .example { padding: 10px 12px 6px }
+  .pair { gap: 18px; max-width: 215px }
+  .pair img { max-width: 88px }
+  .pair span, figcaption { margin-top: 3px }
+  .columns { grid-template-columns: 1fr; gap: 20px }
+  #upload-area { height: 152px }
+  .settings { gap: 17px }
+  .key-row { grid-template-columns: 1fr; gap: 13px; padding-top: 16px; margin-top: 20px }
+  .key-field { max-width: none }
+  .result-mat { padding: 12px }
+  #api-key, textarea { font-size: 16px }
+}
+
+.engine-col { min-width: 0 }
+.engine-choices { display: flex; flex-wrap: wrap; gap: 7px 18px }
+.engine-choices label { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; font-size: 14px; line-height: 1.6 }
+.engine-choices input { margin: 0; accent-color: var(--blue); width: 16px; height: 16px }
+.service-info { font-size: 13px; color: var(--muted); line-height: 1.7; margin: 7px 0 0 }
+.engine-col .key-field { margin-top: 13px }

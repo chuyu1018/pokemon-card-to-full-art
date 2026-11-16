@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f8f7f2">
+  <meta name="referrer" content="no-referrer">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./style.css">
+  <title>宝可梦全景卡工坊</title>
+  <script type="module" src="./main.mjs"></script>
+</head>
+<body>
+<header class="mast">
+  <a class="brand" href="./" aria-label="全景卡工坊首页"><i aria-hidden="true"></i>全景卡工坊</a>
+  <a class="jump" href="#studio">制作卡牌 <span aria-hidden="true">↓</span></a>
+</header>
+<main>
+  <section class="hero" aria-labelledby="hero-title">
+    <div>
+      <h1 id="hero-title">把宝可梦平卡<br><em>延展成全景卡。</em></h1>
+      <p>上传原卡，让插画里的场景一路延伸到卡面边缘。可以保留经典卡框，也可以让画面铺满整张卡。</p>
+    </div>
+    <figure class="example">
+      <div class="pair">
+        <div><img src="./examples/ponyta-original.jpg" alt="小火马原卡，中央插画外围有文字区与黄色边框" width="337" height="470"><span>原卡</span></div>
+        <div><img src="./examples/ponyta-preview.jpg" alt="同一张小火马的过往全景卡样例，插画延展至卡面边缘" width="337" height="470"><span>全景卡样例</span></div>
+      </div>
+      <figcaption><a href="https://pkmncards.com/card/ponyta-generations-gen-14/" target="_blank" rel="noreferrer">小火马 · Generations 14 ↗</a></figcaption>
+    </figure>
+  </section>
+  <form id="studio">
+    <div class="columns">
+      <section class="column">
+        <div class="field-head"><label for="source">原卡图</label><button type="button" class="linklike" id="try-sample">用小火马试做 ↗</button></div>
+        <div id="upload-area">
+          <input type="file" id="source" accept="image/jpeg,image/png,image/webp">
+          <label class="drop" for="source">
+            <span class="upload-icon" aria-hidden="true">↑</span>
+            <strong>上传一张卡图或实拍照</strong>
+            <small>也可拖入图片 · JPG / PNG / WebP · 最高 8 MB</small>
+          </label>
+          <div class="attachment" id="attachment" hidden>
+            <img id="input-preview" alt="所选原卡">
+            <div class="attachment-bar"><span id="filename"></span><button type="button" class="linklike" id="remove-source">移除</button></div>
+          </div>
+        </div>
+      </section>
+      <div class="column settings">
+        <fieldset id="borders">
+          <legend>成卡边框</legend>
+          <div class="choices">
+            <label><input type="radio" name="border" value="gray" checked><span class="edge gray" aria-hidden="true"></span>灰黑框</label>
+            <label><input type="radio" name="border" value="theme"><span class="edge theme" aria-hidden="true"></span>主题色框</label>
+            <label><input type="radio" name="border" value="none"><span class="edge none" aria-hidden="true"></span>无框</label>
+          </div>
+        </fieldset>
+        <div class="brief"><label for="brief">画面要求 <span>选填</span></label><textarea id="brief" rows="3" maxlength="1000" placeholder="例如：沿原画里的草地向下延伸，保留小火马原来的姿势。"></textarea></div>
+      </div>
+    </div>
+    <div class="key-row">
+      <div class="engine-col"><fieldset id="engines"><legend>生图服务</legend>
+        <div class="engine-choices">
+          <label><input type="radio" name="engine" value="public" checked>在线试做</label>
+          <label><input type="radio" name="engine" value="ark">火山方舟（自带 Key）</label>
+        </div>
+      </fieldset>
+      <p id="public-info" class="service-info">原卡和画面要求将发给 Hugging Face 上的 FLUX.2 [klein] 4B 公开体验。无需密钥，共享额度可能需要排队。</p>
+      <div class="key-field" id="key-field" hidden><label for="api-key">火山方舟 API Key</label><input type="password" id="api-key" name="api-key" autocomplete="off" spellcheck="false" autocapitalize="none" placeholder="输入你的方舟 API Key" aria-describedby="key-info">
+        <small id="key-info">密钥仅在当前页面使用，请求直接发给火山方舟。生图消耗你的方舟额度。</small>
+      </div></div>
+      <button class="primary" id="generate" type="submit">生成预览 <span aria-hidden="true">↗</span></button>
+    </div>
+    <div class="feedback">
+      <p id="status" role="status" aria-live="polite"></p>
+      <button type="button" class="linklike" id="cancel" hidden>停止等待</button>
+    </div>
+  </form>
+  <section class="output" id="output" aria-labelledby="result-title" hidden>
+    <div class="result-head"><h2 id="result-title" tabindex="-1">你的全景卡预览</h2><a id="download" class="primary" download>保存图片 <span aria-hidden="true">↓</span></a></div>
+    <div class="result-mat"><img id="result" alt="本次生成的宝可梦全景卡"></div>
+  </section>
+  <noscript>请开启浏览器 JavaScript 后上传原卡并生成图片。</noscript>
+</main>
+</body>
+</html>
