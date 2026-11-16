@@ -102,3 +102,18 @@ h2 { font-family: "Songti SC", SimSun, serif; font-size: clamp(24px,4vw,38px); l
 .engine-choices input { margin: 0; accent-color: var(--blue); width: 16px; height: 16px }
 .service-info { font-size: 13px; color: var(--muted); line-height: 1.7; margin: 7px 0 0 }
 .engine-col .key-field { margin-top: 13px }
+
+#studio .columns { align-items: start }
+#region-editor { margin: 10px 0 0; font-size: 13px }
+#region-editor summary { color: var(--blue); cursor: pointer; width: fit-content; padding-block: 3px }
+#region-editor p { color: var(--muted); line-height: 1.7; margin: 6px 0 }
+.region-stage { width: min(100%, 290px); overflow: hidden; position: relative; cursor: crosshair; touch-action: none; user-select: none; -webkit-user-select: none; }
+.region-stage > img { display: block; width: 100%; height: auto; pointer-events: none }
+.region-box { position: absolute; outline: 2px solid #fff; box-shadow: 0 0 0 999px #18271973, inset 0 0 0 1px #1d50a9; pointer-events: none }
+.region-box button { position: absolute; pointer-events: auto; width: 25px; height: 25px; display: grid; place-items: center; padding: 0; border: 0; background: transparent; border-radius: 4px; transform: translate(-50%, -50%); cursor: nwse-resize; }
+.region-box button::after { content: ''; width: 9px; height: 9px; border-radius: 2px; border: 2px solid white; background: var(--blue); box-shadow: 0 0 0 1px #2948ad96 }
+.region-box [data-corner=nw] { top: 0; left: 0 }
+.region-box [data-corner=ne] { top: 0; left: 100%; cursor: nesw-resize }
+.region-box [data-corner=sw] { top: 100%; left: 0; cursor: nesw-resize }
+.region-box [data-corner=se] { top: 100%; left: 100% }
+.region-reset { margin: 6px 0 0; padding: 4px 0 }

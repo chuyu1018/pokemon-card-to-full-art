@@ -1,16 +1,33 @@
-import { buildCardPrompt, cardOutputSize, loadSkill, sourceSize } from './ark.mjs';
+import { cardOutputSize } from './ark.mjs';
+import { prepareCardLayers, finishCardLayers } from './card-layers.mjs';
 
-export const PUBLIC_MODEL = 'FLUX.2 [klein] 4B';
-const origin = 'https://black-forest-labs-flux-2-klein-4b.hf.space';
+export const PUBLIC_MODEL = 'FLUX.1 Fill [dev]';
+const origin = 'https://black-forest-labs-flux-1-fill-dev.hf.space';
 const base = origin + '/gradio_api';
 const fetchOptions = { credentials: 'omit', referrerPolicy: 'no-referrer', redirect: 'error', cache: 'no-store' };
 const extensions = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
 
-function referenceBlob(dataURL) {
-  const header = /^data:(image\/(?:png|jpeg|webp));base64,/.exec(dataURL);
-  if (!header) throw new Error('卡片参考图没有加载完整。');
-  const raw = atob(dataURL.slice(header[0].length));
-  return new Blob([Uint8Array.from(raw, char => char.charCodeAt(0))], { type: header[1] });
+const templateURL = new URL('./skills/pokemon-card-to-full-art/references/prompt.md', import.meta.url);
+
+async function readSceneTemplate(signal) {
+  if (templateURL.protocol === 'file:' && typeof window === 'undefined') {
+    const { readFile } = await import('node:fs/promises');
+    return readFile(templateURL, 'utf8');
+  }
+  const response = await fetch(templateURL, { credentials: 'omit', signal });
+  if (!response.ok) throw new Error('未能读取卡片续画模板，请刷新后再试。');
+  return response.text();
+}
+
+function scenePrompt(template, brief) {
+  const artRule = template.split(/\r?\n/).find(line => line.startsWith('原插画保护区与视觉锚点'));
+  if (!artRule) throw new Error('卡片模板缺少原插画保护与续画要求。');
+  return [
+    'A single uninterrupted edge-to-edge illustration, continuing the scene in the preserved artwork into the entire surrounding masked area. The completed scene fills every edge. Extend the ground or foreground all the way to the bottom and the sky or upper background all the way to the top. Continue the same scenery, contours, brush strokes, colors, lighting and perspective seamlessly on both sides.',
+    'Keep the original subject exactly once, at its original position and scale inside the protected area. Draw only the surrounding environment. No new characters, text, logos, frames, margins, solid-color panels, smears or repeated textures. All white mask pixels require original painted scenery.',
+    artRule,
+    brief ? 'Apply any relevant scenery notes while preserving the original subject and drawing a text-free continuous background: ' + brief : ''
+  ].filter(Boolean).join('\n\n');
 }
 
 function serviceFailure(status, detail) {
@@ -69,7 +86,7 @@ async function cancelJob(eventID) {
 }
 
 /** Uses the published Gradio API. No credentials are accepted or forwarded. */
-export async function generatePublicCard({ source, border = 'gray', brief = '', signal, dimensions, skill, onStatus = () => {} }) {
+export async function generatePublicCard({ source, border = 'gray', brief = '', rect, signal, skill, onStatus = () => {} }) {
   if (!(source instanceof Blob) || !extensions[source.type] || !source.size || source.size > 30 * 1024 * 1024)
     throw new Error('请上传 30 MB 以内的 JPG、PNG 或 WebP 原卡。');
   const controller = new AbortController();
@@ -81,38 +98,38 @@ export async function generatePublicCard({ source, border = 'gray', brief = '', 
   const network = { signal: controller.signal };
   try {
     controller.signal.throwIfAborted();
-    onStatus('正在读取原卡和两张参考图…');
-    const [assets, size] = await Promise.all([skill || loadSkill(), dimensions || sourceSize(source)]);
-    cardOutputSize(size.width, size.height);
-    const scale = 1024 / Math.max(size.width, size.height);
-    const rounded = length => Math.min(1024, Math.max(256, Math.round(length * scale / 16) * 16));
-    const width = rounded(size.width), height = rounded(size.height);
-    if (Math.abs(Math.log((width / height) / (size.width / size.height))) > 0.05)
-      throw new Error('原卡比例过宽或过高，公开模型无法保留其比例。请先裁出正面卡片。');
-    const names = { gray: 'a visible rounded charcoal gray outer border', theme: 'a rounded border in the requested or card theme color', none: 'no outer border at all' };
-    const prompt = [
-      'Edit image 1 into one complete, front-facing full-art Pokémon trading card. Extend the illustration into the surrounding areas, replacing the old solid panels. Keep the original illustration anchored at the same position, scale and framing. Preserve EVERY original card word in its original language, HP, moves, energy symbols, card number and artist. Text sits directly on the extended artwork. For the outside edge use ' + names[border] + '.',
-      'Image 2 is a UI-layout reference only. Image 3 is an outer-border shape reference only. The only Pokémon, data and scene in the result are those from image 1. Keep all four card edges in frame.',
-      brief ? 'Requested visual detail: ' + String(brief).trim() : '',
-      buildCardPrompt({ template: assets.template, border, brief, ...size })
-    ].filter(Boolean).join('\n\n');
-    const ui = referenceBlob(assets.ui), edge = referenceBlob(assets.border);
-    const files = [
-      [source, 'source.' + extensions[source.type]], [ui, 'ui.' + extensions[ui.type]], [edge, 'border.' + extensions[edge.type]]
-    ];
+    onStatus('正在提取原插画并准备续画区域…');
+    const notes = String(brief || '').trim();
+    if (notes.length > 2000) throw new Error('补充要求请控制在 2000 字以内。');
+    const [layers, template] = await Promise.all([
+      prepareCardLayers(source, { rect, border, brief: notes }),
+      skill?.template || readSceneTemplate(controller.signal)
+    ]);
+    controller.signal.throwIfAborted();
+    cardOutputSize(layers.width, layers.height);
+    const ratio = layers.width / layers.height;
+    if (ratio < 9 / 16 || ratio > 16 / 9)
+      throw new Error('公开扩图模型支持 9:16 至 16:9，请先裁出正面卡片。');
+    // This Space recomputes both dimensions from the uploaded guide in multiples of eight.
+    const scale = 1024 / Math.max(layers.width, layers.height);
+    const width = Math.floor(Math.round(layers.width * scale) / 8) * 8;
+    const height = Math.floor(Math.round(layers.height * scale) / 8) * 8;
+    const prompt = scenePrompt(template, notes);
+    const files = [[layers.guide, 'scene.png'], [layers.mask, 'mask.png']];
     const form = new FormData();
     for (const [blob, name] of files) form.append('files', blob, name);
-    onStatus('正在上传原卡和两张参考图…');
+    onStatus('正在上传构图底图和扩图蒙版…');
     const paths = await (await checked(base + '/upload', { ...network, method: 'POST', body: form })).json();
-    if (!Array.isArray(paths) || paths.length !== 3 || paths.some(path => typeof path !== 'string' || !path))
-      throw new Error('公开体验服务没有收齐三张图片。');
-    const gallery = files.map(([blob, name], i) => ({
-      image: { path: paths[i], orig_name: name, mime_type: blob.type, meta: { _type: 'gradio.FileData' } }, caption: null
+    if (!Array.isArray(paths) || paths.length !== files.length || paths.some(path => typeof path !== 'string' || !path))
+      throw new Error('公开体验服务没有收齐续画所需的图片。');
+    const [background, mask] = files.map(([blob, name], i) => ({
+      path: paths[i], orig_name: name, mime_type: blob.type, meta: { _type: 'gradio.FileData' }
     }));
+    const editor = { background, layers: [mask], composite: null };
     onStatus('已上传，正在进入生成队列…');
     const call = await (await checked(base + '/call/infer', {
       ...network, method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ data: [prompt, gallery, 'Distilled (4 steps)', 0, true, width, height, 4, 1, false] })
+      body: JSON.stringify({ data: [editor, prompt, 0, true, width, height, 30, 24] })
     })).json();
     if (!call.event_id || typeof call.event_id !== 'string') throw new Error('公开体验服务未接收任务。');
     eventID = call.event_id;
@@ -127,7 +144,10 @@ export async function generatePublicCard({ source, border = 'gray', brief = '', 
       bytes[0] === 137 && tag(1).startsWith('PNG') ? 'image/png' :
       bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255 ? 'image/jpeg' : null;
     if (!mimeType) throw new Error('公开体验服务返回的图片数据不完整。');
-    return { blob: new Blob([bytes], { type: mimeType }), mimeType, label: '全景卡效果预览' };
+    onStatus('正在还原原画、原卡文字与外框…');
+    const blob = await finishCardLayers(layers, new Blob([bytes], { type: mimeType }));
+    controller.signal.throwIfAborted();
+    return { blob, mimeType: blob.type, label: '全景卡效果预览' };
   } catch (error) {
     if (controller.signal.aborted) {
       if (eventID && !finished) void cancelJob(eventID).catch(() => {});

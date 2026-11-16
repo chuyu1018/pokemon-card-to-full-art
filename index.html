@@ -45,6 +45,20 @@
             <div class="attachment-bar"><span id="filename"></span><button type="button" class="linklike" id="remove-source">移除</button></div>
           </div>
         </div>
+        <details id="region-editor" hidden>
+          <summary>校准原插画范围</summary>
+          <p>框内的原画会保留。拖动四角微调，或从插画一角拖到对角重新框选。</p>
+          <div class="region-stage">
+            <img alt="待校准的原卡" draggable="false">
+            <div class="region-box">
+              <button type="button" data-corner="nw" aria-label="移动插画左上角，可用方向键微调"></button>
+              <button type="button" data-corner="ne" aria-label="移动插画右上角，可用方向键微调"></button>
+              <button type="button" data-corner="sw" aria-label="移动插画左下角，可用方向键微调"></button>
+              <button type="button" data-corner="se" aria-label="移动插画右下角，可用方向键微调"></button>
+            </div>
+          </div>
+          <button type="button" class="linklike region-reset">恢复初始范围</button>
+        </details>
       </section>
       <div class="column settings">
         <fieldset id="borders">
@@ -65,7 +79,7 @@
           <label><input type="radio" name="engine" value="ark">火山方舟（自带 Key）</label>
         </div>
       </fieldset>
-      <p id="public-info" class="service-info">原卡和画面要求将发给 Hugging Face 上的 FLUX.2 [klein] 4B 公开体验。无需密钥，共享额度可能需要排队。</p>
+      <p id="public-info" class="service-info">浏览器会将含所选原插画的构图底图、扩图蒙版和画面要求发给 Hugging Face 上的 FLUX.1 Fill [dev]。此公开体验仅供非商业试做，共享额度可能需要排队。</p>
       <div class="key-field" id="key-field" hidden><label for="api-key">火山方舟 API Key</label><input type="password" id="api-key" name="api-key" autocomplete="off" spellcheck="false" autocapitalize="none" placeholder="输入你的方舟 API Key" aria-describedby="key-info">
         <small id="key-info">密钥仅在当前页面使用，请求直接发给火山方舟。生图消耗你的方舟额度。</small>
       </div></div>

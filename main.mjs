@@ -1,4 +1,5 @@
 import { generateCard } from './ark.mjs';
+import { makeRegionEditor } from './region.mjs';
 
 const $ = id => document.getElementById(id);
 const form = $('studio');
@@ -15,6 +16,7 @@ let resultUrl = '';
 let loadingSource = false;
 let selectionVersion = 0;
 let controller = null;
+const region = makeRegionEditor($('region-editor'), () => Boolean(controller) || loadingSource);
 
 function tell(message = '', error = false) {
   $('status').textContent = message;
@@ -33,6 +35,7 @@ function clearSelection() {
   selectionVersion++;
   loadingSource = false;
   selected = null;
+  region.clear();
   sourceInput.value = '';
   if (sourceUrl) URL.revokeObjectURL(sourceUrl);
   sourceUrl = '';
@@ -48,6 +51,7 @@ function syncControls() {
   const busy = Boolean(controller);
   form.setAttribute('aria-busy', String(busy));
   for (const id of ['source', 'try-sample', 'remove-source', 'borders', 'brief', 'engines']) $(id).disabled = busy;
+  region.update(Boolean(selected) && !isArk(), busy || loadingSource);
   keyInput.disabled = busy || !isArk();
   $('public-info').hidden = isArk();
   $('key-field').hidden = !isArk();
@@ -75,6 +79,7 @@ async function chooseFile(readFile, sample = false) {
     catch { throw new Error('浏览器无法读取这张图片，请重新导出原图后再试。'); }
     if (decoded.naturalWidth * decoded.naturalHeight > 64_000_000) throw new Error('参考图像素过大，请缩小到 6400 万像素以内。');
     if (version !== selectionVersion) return false;
+    region.load(decoded, sample);
     if (sourceUrl) URL.revokeObjectURL(sourceUrl);
     sourceUrl = url;
     url = '';
@@ -196,7 +201,7 @@ form.addEventListener('submit', async event => {
     const job = { source: selected, border, brief, signal: current.signal,
       onStatus: text => { if (!current.signal.aborted) tell(String(text)); } };
     const { blob } = useArk ? await generateCard({ ...job, apiKey })
-      : await (await import('./public-model.mjs')).generatePublicCard(job);
+      : await (await import('./public-model.mjs')).generatePublicCard({ ...job, rect: region.getRect() });
     current.signal.throwIfAborted();
     await displayResult(blob, current.signal);
     tell('预览已生成。保存前可对照原卡检查卡名、数值和小字。');
